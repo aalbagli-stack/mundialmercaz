@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Polla Mundialera de la Colonia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=16">
+</head>
+<body>
+    <!-- Loading splash while Supabase restores session -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="splash-spinner"></div>
+            <p>Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen hidden">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-label="Kadima">
+                        <polyline points="8,8 58,50 8,92" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="miter" stroke-linecap="square"/>
+                        <polyline points="42,8 92,50 42,92" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="miter" stroke-linecap="square"/>
+                        <rect x="98" y="8" width="11" height="84" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="brand-wordmark">KADIMA</div>
+                <h1>LA POLLA MUNDIALERA<br><span class="title-sub">DE LA COLONIA</span></h1>
+                <h2>Comunidad Israelita de Santiago</h2>
+                <p class="subtitle">FIFA World Cup 2026&trade;</p>
+            </div>
+
+            <div class="login-body">
+                <!-- TABS: Login / Register -->
+                <div class="login-tabs">
+                    <button class="login-tab active" data-mode="login">Iniciar Sesi&oacute;n</button>
+                    <button class="login-tab" data-mode="register">Registrarse</button>
+                </div>
+
+                <!-- MAIN AUTH FORM -->
+                <div id="login-step-main" class="login-form">
+                    <!-- LOGIN MODE -->
+                    <div id="mode-login-content">
+                        <p class="login-intro">Ingresa con tu email y contrase&ntilde;a.</p>
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Contrase&ntilde;a</label>
+                            <input type="password" id="login-password" placeholder="Tu contrase&ntilde;a" autocomplete="current-password">
+                            <p class="form-hint">
+                                <a href="#" id="btn-forgot-password">&iquest;Olvidaste tu contrase&ntilde;a?</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- REGISTER MODE -->
+                    <div id="mode-register-content" class="hidden">
+                        <p class="login-intro">Crea tu cuenta para participar en la polla.</p>
+                        <div class="form-group">
+                            <label for="register-name">Tu nombre</label>
+                            <input type="text" id="register-name" placeholder="Ej: Juan P&eacute;rez" maxlength="40" autocomplete="name">
+                            <p class="form-hint">As&iacute; aparecer&aacute;s en la tabla de posiciones.</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" placeholder="tu@email.com" autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Contrase&ntilde;a</label>
+                            <input type="password" id="register-password" placeholder="M&iacute;nimo 6 caracteres" autocomplete="new-password">
+                            <p class="form-hint">M&iacute;nimo 6 caracteres. Guarda esta contrase&ntilde;a para entrar despu&eacute;s.</p>
+                        </div>
+                    </div>
+
+                    <button id="btn-auth-submit" class="btn btn-primary btn-full">
+                        <span class="btn-label">Iniciar Sesi&oacute;n</span>
+                        <span class="btn-loading hidden">Procesando...</span>
+                    </button>
+                    <div id="login-error" class="login-error hidden"></div>
+                </div>
+
+                <!-- FORGOT PASSWORD STEP -->
+                <div id="login-step-forgot" class="login-form hidden">
+                    <p class="login-intro">
+                        Ingresa tu email y te enviaremos un link para restablecer tu contrase&ntilde;a.
+                    </p>
+                    <div class="form-group">
+                        <label for="forgot-email">Email</label>
+                        <input type="email" id="forgot-email" placeholder="tu@email.com" autocomplete="email">
+                    </div>
+                    <button id="btn-send-reset" class="btn btn-primary btn-full">
+                        <span class="btn-label">Enviar link de recuperaci&oacute;n</span>
+                        <span class="btn-loading hidden">Enviando...</span>
+                    </button>
+                    <button id="btn-back-to-login" class="btn btn-secondary btn-full" style="margin-top: 0.5rem;">
+                        Volver
+                    </button>
+                    <div id="forgot-message" class="login-success hidden"></div>
+                    <div id="forgot-error" class="login-error hidden"></div>
+                </div>
+
+                <!-- NEW PASSWORD STEP (after clicking reset link) -->
+                <div id="login-step-newpass" class="login-form hidden">
+                    <p class="login-intro">
+                        Ingresa tu nueva contrase&ntilde;a para completar la recuperaci&oacute;n.
+                    </p>
+                    <div class="form-group">
+                        <label for="new-password">Nueva contrase&ntilde;a</label>
+                        <input type="password" id="new-password" placeholder="M&iacute;nimo 6 caracteres" autocomplete="new-password">
+                    </div>
+                    <button id="btn-save-newpass" class="btn btn-primary btn-full">
+                        <span class="btn-label">Guardar y entrar</span>
+                        <span class="btn-loading hidden">Guardando...</span>
+                    </button>
+                    <div id="newpass-error" class="login-error hidden"></div>
+                </div>
+
+                <!-- POST-REGISTER CONFIRMATION STEP -->
+                <div id="login-step-confirm" class="login-form hidden">
+                    <div class="confirm-email-info">
+                        <div class="confirm-email-icon">&#9993;</div>
+                        <h4>&iexcl;Casi listo!</h4>
+                        <p>
+                            Te enviamos un email a <strong id="confirm-email-display"></strong>
+                            con un link para <strong>verificar tu cuenta</strong>.
+                        </p>
+                        <p class="form-hint" style="text-align: center; margin-top: 1rem;">
+                            Revisa tu bandeja de entrada (y la carpeta de spam).
+                            Una vez que hagas click en el link, podr&aacute;s entrar con tu email y contrase&ntilde;a.
+                        </p>
+                    </div>
+                    <button id="btn-confirm-back" class="btn btn-secondary btn-full">
+                        Volver al inicio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <header class="main-header">
+            <div class="header-bg"></div>
+            <div class="header-content">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-label="Kadima">
+                        <polyline points="8,8 58,50 8,92" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="miter" stroke-linecap="square"/>
+                        <polyline points="42,8 92,50 42,92" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="miter" stroke-linecap="square"/>
+                        <rect x="98" y="8" width="11" height="84" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="brand-wordmark">KADIMA</div>
+                <h1 id="app-title">El Mundial Se Vive<br><span class="title-sub">en Comunidad</span></h1>
+            </div>
+            <div class="user-bar">
+                <span id="user-display"></span>
+                <button id="btn-logout" class="btn btn-back btn-sm">Cerrar Sesi&oacute;n</button>
+            </div>
+        </header>
+
+        <!-- ============ HOMEPAGE (Landing after login) ============ -->
+        <div id="hub-screen" class="hub-screen">
+            <div class="hub-content">
+                <div class="hub-cards">
+                    <button class="hub-card hub-card-image" data-destination="polla">
+                        <div class="hub-card-image-wrap">
+                            <img src="polla-icon.png" alt="Polla Mundialera" onerror="this.onerror=null; this.parentElement.innerHTML='&#9917;'; this.parentElement.classList.add('hub-card-fallback');">
+                        </div>
+                        <h3>Polla Mundialera</h3>
+                        <p>Llena tus pron&oacute;sticos, revisa la tabla de posiciones y gana premios.</p>
+                        <span class="hub-card-arrow">Ingresar &rarr;</span>
+                    </button>
+                    <button class="hub-card hub-card-image" data-destination="espacio">
+                        <div class="hub-card-image-wrap">
+                            <img src="kadima-center.png" alt="Kadima Center" onerror="this.onerror=null; this.parentElement.innerHTML='&#127969;'; this.parentElement.classList.add('hub-card-fallback');">
+                        </div>
+                        <h3>Reserva el Kadima Center</h3>
+                        <p>Reserva el Kadima Center para ver el mundial con tus amigos.</p>
+                        <span class="hub-card-arrow">Reservar &rarr;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ POLLA APP ============ -->
+        <div id="polla-app" class="sub-app hidden">
+            <div class="sub-app-header">
+                <button class="btn btn-back btn-sm btn-back-hub">&larr; Volver al inicio</button>
+                <span class="sub-app-title">&#9917; La Polla Mundialera</span>
+            </div>
+            <nav class="main-nav">
+                <button class="nav-btn active" data-view="predictions">
+                    <span class="nav-icon">&#9998;</span> Pron&oacute;stico
+                </button>
+                <button class="nav-btn" data-view="groups">
+                    <span class="nav-icon">&#9879;</span> Grupos
+                </button>
+                <button class="nav-btn" data-view="knockout">
+                    <span class="nav-icon">&#127942;</span> Eliminatorias
+                </button>
+                <button class="nav-btn" data-view="leaderboard">
+                    <span class="nav-icon">&#127941;</span> Tabla
+                </button>
+                <button class="nav-btn" data-view="scoring">
+                    <span class="nav-icon">&#128220;</span> Reglas
+                </button>
+                <button class="nav-btn nav-admin-only hidden" data-view="admin">
+                    <span class="nav-icon">&#128272;</span> Admin
+                </button>
+            </nav>
+
+        <main class="main-content">
+            <section id="view-predictions" class="view active">
+                <div class="section-header">
+                    <h2 id="predictions-title">Mi Pron&oacute;stico</h2>
+                </div>
+                <div id="predictions-list"></div>
+            </section>
+
+            <section id="view-groups" class="view">
+                <div class="section-header">
+                    <h2>Fase de Grupos</h2>
+                    <div class="filter-row">
+                        <select id="group-filter" class="select-filter">
+                            <option value="all">Todos los grupos</option>
+                        </select>
+                        <select id="prediction-selector-groups" class="select-filter">
+                            <option value="">Seleccionar pron&oacute;stico</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="groups-container"></div>
+            </section>
+
+            <section id="view-knockout" class="view">
+                <div class="section-header">
+                    <h2>Fase Eliminatoria</h2>
+                    <select id="prediction-selector-knockout" class="select-filter">
+                        <option value="">Seleccionar pron&oacute;stico</option>
+                    </select>
+                </div>
+                <div id="knockout-container"></div>
+            </section>
+
+            <section id="view-leaderboard" class="view">
+                <div class="section-header">
+                    <h2>Tabla de Posiciones</h2>
+                </div>
+                <div id="leaderboard-container"></div>
+            </section>
+
+            <section id="view-scoring" class="view">
+                <div class="scoring-info">
+                    <h2>Reglas de la Polla</h2>
+
+                    <!-- ============ C&Oacute;MO PARTICIPAR ============ -->
+                    <div class="rules-section callout-primary">
+                        <h3>&#128179; C&oacute;mo Participar</h3>
+                        <p class="rules-lead">
+                            Para ser parte de la polla y optar a los premios, cada participante debe:
+                        </p>
+                        <ol class="rules-list">
+                            <li>Registrarse en la app con su email y nombre.</li>
+                            <li>
+                                <strong>Transferir $10.000 CLP</strong> a la siguiente cuenta:
+                                <div class="bank-box">
+                                    <div class="bank-row"><span>Nombre</span><strong>[POR DEFINIR]</strong></div>
+                                    <div class="bank-row"><span>RUT</span><strong>[POR DEFINIR]</strong></div>
+                                    <div class="bank-row"><span>Banco</span><strong>[POR DEFINIR]</strong></div>
+                                    <div class="bank-row"><span>Tipo de cuenta</span><strong>[POR DEFINIR]</strong></div>
+                                    <div class="bank-row"><span>N&uacute;mero de cuenta</span><strong>[POR DEFINIR]</strong></div>
+                                    <div class="bank-row"><span>Email</span><strong>[POR DEFINIR]</strong></div>
+                                </div>
+                            </li>
+                            <li>
+                                <strong>Enviar el comprobante</strong> de la transferencia al email
+                                <strong class="highlight-email">[CORREO_CONFIRMACION]</strong>
+                                indicando tu nombre completo y el email con el que te registraste en la polla.
+                            </li>
+                        </ol>
+                        <div class="alert alert-danger">
+                            <strong>&#9888; Importante:</strong> Si la transferencia no est&aacute; confirmada
+                            <strong>antes del inicio del Mundial (11 de junio 2026)</strong>,
+                            no podr&aacute;s optar a los premios aunque llenes el pron&oacute;stico.
+                        </div>
+                    </div>
+
+                    <!-- ============ PREMIOS ============ -->
+                    <div class="rules-section">
+                        <h3>&#127942; Premios</h3>
+                        <p class="rules-lead">
+                            El total recaudado se reparte entre los 3 primeros lugares de la tabla al final del mundial:
+                        </p>
+                        <div class="prize-cards">
+                            <div class="prize-card first">
+                                <div class="prize-medal">&#129351;</div>
+                                <div class="prize-place">1er Lugar</div>
+                                <div class="prize-amount">60%</div>
+                                <p>del pozo total</p>
+                            </div>
+                            <div class="prize-card second">
+                                <div class="prize-medal">&#129352;</div>
+                                <div class="prize-place">2do Lugar</div>
+                                <div class="prize-amount">25%</div>
+                                <p>del pozo total</p>
+                            </div>
+                            <div class="prize-card third">
+                                <div class="prize-medal">&#129353;</div>
+                                <div class="prize-place">3er Lugar</div>
+                                <div class="prize-amount">15%</div>
+                                <p>del pozo total</p>
+                            </div>
+                        </div>
+                        <p class="rules-note">
+                            En caso de empate de puntaje, gana quien tenga m&aacute;s resultados exactos.
+                            Si persiste el empate, m&aacute;s aciertos por diferencia de goles.
+                        </p>
+                    </div>
+
+                    <!-- ============ BLOQUEO POR HORARIO ============ -->
+                    <div class="rules-section callout-warning">
+                        <h3>&#128274; Bloqueo de Pron&oacute;sticos</h3>
+                        <p class="rules-lead">
+                            <strong>Una vez que comienza un partido, su pron&oacute;stico se bloquea autom&aacute;ticamente</strong>
+                            y no puede modificarse bajo ninguna circunstancia.
+                        </p>
+                        <ul class="rules-list">
+                            <li>Puedes llenar o modificar cualquier pron&oacute;stico <strong>antes</strong> del horario oficial de inicio del partido.</li>
+                            <li>El sistema usa el calendario oficial FIFA 2026 y la hora de tu dispositivo.</li>
+                            <li>Los partidos que a&uacute;n no comienzan muestran el tiempo restante.</li>
+                            <li>Los partidos bloqueados aparecen con un &iacute;cono de candado y no permiten cambios.</li>
+                        </ul>
+                    </div>
+
+                    <!-- ============ SISTEMA DE PUNTUACI&Oacute;N ============ -->
+                    <div class="rules-section">
+                        <h3>&#127919; Sistema de Puntuaci&oacute;n</h3>
+                        <p class="rules-lead">
+                            Por cada partido acertado ganas puntos seg&uacute;n qu&eacute; tan preciso sea tu pron&oacute;stico:
+                        </p>
+                        <div class="scoring-cards">
+                            <div class="scoring-card gold">
+                                <div class="scoring-points">5</div>
+                                <div class="scoring-label">Resultado Exacto</div>
+                                <p>Aciertas el marcador exacto (ej: predices 2-1 y termina 2-1)</p>
+                            </div>
+                            <div class="scoring-card silver">
+                                <div class="scoring-points">3</div>
+                                <div class="scoring-label">Diferencia de Goles</div>
+                                <p>Aciertas el ganador y la diferencia (ej: predices 2-1 y termina 3-2)</p>
+                            </div>
+                            <div class="scoring-card bronze">
+                                <div class="scoring-points">2</div>
+                                <div class="scoring-label">Resultado Correcto</div>
+                                <p>Aciertas qui&eacute;n gana o si hay empate (pero no la diferencia)</p>
+                            </div>
+                            <div class="scoring-card miss">
+                                <div class="scoring-points">0</div>
+                                <div class="scoring-label">Resultado Incorrecto</div>
+                                <p>No aciertas el resultado del partido</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ MULTIPLICADORES ============ -->
+                    <div class="rules-section">
+                        <h3>&#128200; Multiplicadores por Fase</h3>
+                        <p class="rules-lead">
+                            Mientras m&aacute;s avanza el torneo, m&aacute;s valen los pron&oacute;sticos. Los puntos base se multiplican seg&uacute;n la fase:
+                        </p>
+                        <div class="multiplier-grid">
+                            <div class="multiplier-item"><span class="multiplier-stage">Fase de Grupos</span><span class="multiplier-value">x1</span></div>
+                            <div class="multiplier-item"><span class="multiplier-stage">Octavos de Final (32)</span><span class="multiplier-value">x1.5</span></div>
+                            <div class="multiplier-item"><span class="multiplier-stage">Octavos de Final (16)</span><span class="multiplier-value">x1.5</span></div>
+                            <div class="multiplier-item"><span class="multiplier-stage">Cuartos de Final</span><span class="multiplier-value">x2</span></div>
+                            <div class="multiplier-item"><span class="multiplier-stage">Semifinales</span><span class="multiplier-value">x2.5</span></div>
+                            <div class="multiplier-item"><span class="multiplier-stage">3er Puesto y Final</span><span class="multiplier-value">x3</span></div>
+                        </div>
+                    </div>
+
+                    <!-- ============ EJEMPLOS ============ -->
+                    <div class="rules-section">
+                        <h3>&#129504; Ejemplos de C&aacute;lculo</h3>
+                        <div class="example-grid">
+                            <div class="example-item"><div class="example-match">Fase Grupos: Predices 2-1, real 2-1</div><div class="example-calc">5 &times; 1 = <strong>5 pts</strong></div></div>
+                            <div class="example-item"><div class="example-match">Grupos: Predices 2-1, real 3-2</div><div class="example-calc">3 &times; 1 = <strong>3 pts</strong></div></div>
+                            <div class="example-item"><div class="example-match">Grupos: Predices 2-0, real 3-1</div><div class="example-calc">2 &times; 1 = <strong>2 pts</strong></div></div>
+                            <div class="example-item"><div class="example-match">Cuartos: Predices 1-0, real 1-0</div><div class="example-calc">5 &times; 2 = <strong>10 pts</strong></div></div>
+                            <div class="example-item"><div class="example-match">Semis: Predices 1-1, real 1-1</div><div class="example-calc">5 &times; 2.5 = <strong>13 pts</strong></div></div>
+                            <div class="example-item"><div class="example-match">Final: Predices 2-1, real 1-0</div><div class="example-calc">2 &times; 3 = <strong>6 pts</strong></div></div>
+                        </div>
+                    </div>
+
+                    <!-- ============ OTRAS REGLAS ============ -->
+                    <div class="rules-section">
+                        <h3>&#9432; Otras Reglas Importantes</h3>
+                        <ul class="rules-list">
+                            <li>Los pron&oacute;sticos de eliminatorias se llenan por <strong>n&uacute;mero de partido</strong> (M73, M74, etc.) antes de saber qu&eacute; equipos juegan. Puedes actualizar cualquier marcador hasta el inicio de ese partido.</li>
+                            <li>Si el partido va a tiempo extra o penales, <strong>solo cuenta el resultado al final de los 90 minutos</strong> para efectos de puntaje.</li>
+                            <li>Cada participante tiene un solo pron&oacute;stico asociado a su email.</li>
+                            <li>Los resultados reales son ingresados por el administrador despu&eacute;s de cada partido.</li>
+                            <li>La tabla de posiciones se actualiza autom&aacute;ticamente al ingresar un resultado real.</li>
+                            <li>En caso de disputas o situaciones no contempladas, la decisi&oacute;n final es del administrador de la polla.</li>
+                        </ul>
+                    </div>
+
+                    <p class="rules-footer">
+                        &iexcl;Suerte y que gane el mejor! &#9917; &#129351;
+                    </p>
+                </div>
+            </section>
+
+            <!-- View ADMIN moved to be before espacio-app -->
+            <section id="view-admin" class="view">
+                <div class="section-header">
+                    <h2>Panel de Administraci&oacute;n</h2>
+                </div>
+                <div class="admin-sections">
+                    <div class="admin-section-card">
+                        <h3>Resultados Reales</h3>
+                        <p class="text-muted">Ingresa resultados de partidos ya jugados para calcular puntajes.</p>
+                        <div class="filter-row" style="margin: 1rem 0;">
+                            <select id="admin-stage-filter" class="select-filter">
+                                <option value="groups">Fase de Grupos</option>
+                                <option value="r32">Treintaidosavos</option>
+                                <option value="r16">Octavos de Final</option>
+                                <option value="qf">Cuartos de Final</option>
+                                <option value="sf">Semifinales</option>
+                                <option value="final">Final</option>
+                            </select>
+                            <select id="admin-group-filter" class="select-filter">
+                                <option value="all">Todos los grupos</option>
+                            </select>
+                        </div>
+                        <div id="admin-results-container"></div>
+                    </div>
+                    <div class="admin-section-card">
+                        <h3>Gestionar Participantes</h3>
+                        <p class="text-muted">Ver y eliminar pron&oacute;sticos de participantes.</p>
+                        <div id="admin-predictions-list"></div>
+                    </div>
+                    <div class="admin-section-card">
+                        <h3>Reservas del Espacio</h3>
+                        <p class="text-muted">Ver todas las reservas con informaci&oacute;n completa de invitados.</p>
+                        <div id="admin-reservations-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            </main><!-- /polla-app main-content -->
+        </div><!-- /polla-app -->
+
+        <!-- ============ ESPACIO APP ============ -->
+        <div id="espacio-app" class="sub-app hidden">
+            <div class="sub-app-header">
+                <button class="btn btn-back btn-sm btn-back-hub">&larr; Volver al inicio</button>
+                <span class="sub-app-title">&#127969; Reserva el Kadima Center</span>
+            </div>
+            <main class="main-content">
+            <!-- ============ ESPACIO (Reservas) ============ -->
+            <section id="view-space" class="view active">
+                <div class="section-header">
+                    <h2>Reserva el Kadima Center</h2>
+                    <p class="section-subtitle">Para ver el mundial con tus amigos</p>
+                </div>
+
+                <div class="space-intro rules-section callout-primary" style="margin-bottom: 1.5rem;">
+                    <h3>&#127969; &#127789; Kadima Center &mdash; Partidos + Asados</h3>
+                    <p class="rules-lead">
+                        Reserva el <strong>Kadima Center</strong> para ver un partido del Mundial con familia y amigos.
+                        Selecciona un partido disponible y registra a <strong>todos los invitados</strong> que asistir&aacute;n.
+                    </p>
+                    <ul class="rules-list">
+                        <li>Cada partido permite <strong>una sola reserva</strong>. Quien reserva primero se queda con el espacio.</li>
+                        <li>Debes registrar el nombre completo, RUT, tel&eacute;fono, email y si es socio Merkaz para cada invitado (incluy&eacute;ndote a ti).</li>
+                        <li>Solo puedes cancelar o modificar tu reserva antes del inicio del partido.</li>
+                        <li>La informaci&oacute;n de los invitados es confidencial y solo visible para ti y el administrador.</li>
+                    </ul>
+                </div>
+
+                <!-- My Reservations -->
+                <div id="my-reservations-section" class="rules-section hidden" style="margin-bottom: 1.5rem;">
+                    <h3>&#128197; Mis Reservas</h3>
+                    <div id="my-reservations-list"></div>
+                </div>
+
+                <!-- Filter -->
+                <div class="filter-row" style="margin-bottom: 1rem;">
+                    <select id="space-stage-filter" class="select-filter">
+                        <option value="all">Todos los partidos</option>
+                        <option value="groups">Fase de Grupos</option>
+                        <option value="r32">Treintaidosavos</option>
+                        <option value="r16">Octavos de Final</option>
+                        <option value="qf">Cuartos de Final</option>
+                        <option value="sf">Semifinales</option>
+                        <option value="final">Final</option>
+                    </select>
+                    <select id="space-availability-filter" class="select-filter">
+                        <option value="all">Todos</option>
+                        <option value="available">Solo disponibles</option>
+                        <option value="reserved">Solo reservados</option>
+                    </select>
+                </div>
+
+                <div id="space-matches-container"></div>
+            </section>
+
+            <!-- Reservation Modal -->
+            <div id="reservation-modal" class="modal hidden">
+                <div class="modal-overlay"></div>
+                <div class="modal-content modal-wide">
+                    <button class="modal-close" id="reservation-modal-close">&times;</button>
+                    <h3 id="reservation-modal-title">Reservar Kadima Center</h3>
+                    <div id="reservation-match-info" class="reservation-match-info"></div>
+
+                    <div class="form-group">
+                        <label>Invitados (incluy&eacute;ndote a ti)</label>
+                        <p class="form-hint">Agrega a todas las personas que asistir&aacute;n.</p>
+                        <div id="guests-list"></div>
+                        <button id="btn-add-guest" class="btn btn-secondary btn-sm" style="margin-top: 0.75rem;">
+                            + Agregar invitado
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reservation-notes">Notas adicionales (opcional)</label>
+                        <textarea id="reservation-notes" rows="2" placeholder="Cualquier comentario para el administrador..." class="text-input-full"></textarea>
+                    </div>
+
+                    <div class="confirm-actions" style="justify-content: space-between;">
+                        <button id="btn-cancel-reservation" class="btn btn-danger hidden">Cancelar Reserva</button>
+                        <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                            <button id="btn-close-reservation" class="btn btn-secondary">Cerrar</button>
+                            <button id="btn-save-reservation" class="btn btn-primary">Guardar Reserva</button>
+                        </div>
+                    </div>
+                    <div id="reservation-error" class="login-error hidden"></div>
+                </div>
+            </div>
+
+            </main><!-- /espacio-app main-content -->
+        </div><!-- /espacio-app -->
+
+        <!-- Edit Prediction Overlay -->
+        <div id="edit-prediction-overlay" class="overlay hidden">
+            <div class="overlay-header">
+                <button id="btn-back-predictions" class="btn btn-back">&larr; Volver</button>
+                <h2 id="edit-prediction-title"></h2>
+                <div class="edit-stats">
+                    <span id="edit-filled-count">0</span>/104 completados
+                </div>
+            </div>
+            <div class="edit-nav">
+                <button class="edit-nav-btn active" data-stage="groups">Grupos</button>
+                <button class="edit-nav-btn" data-stage="r32">Octavos de Final (32)</button>
+                <button class="edit-nav-btn" data-stage="r16">Octavos de Final (16)</button>
+                <button class="edit-nav-btn" data-stage="qf">Cuartos</button>
+                <button class="edit-nav-btn" data-stage="sf">Semifinales</button>
+                <button class="edit-nav-btn" data-stage="final">Final</button>
+            </div>
+            <div id="edit-matches-container"></div>
+            <div id="save-indicator" class="save-indicator hidden">Guardado &#10003;</div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <h3 id="confirm-title">Confirmar</h3>
+                <p id="confirm-message"></p>
+                <div class="confirm-actions">
+                    <button id="confirm-cancel" class="btn btn-secondary">Cancelar</button>
+                    <button id="confirm-ok" class="btn btn-danger">Eliminar</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="main-footer">
+            <p>La Polla Mundialera de la Colonia &bull; Kadima &bull; Comunidad Israelita de Santiago &bull; 2026</p>
+        </footer>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="config.js?v=16"></script>
+    <script src="data.js?v=16"></script>
+    <script src="app.js?v=16"></script>
+</body>
+</html>
