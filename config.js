@@ -6,6 +6,6 @@
 // ========================================
 
 const SUPABASE_CONFIG = {
-    url: 'https://rbsbuysvzqhfmthdzqsv.supabase.co/rest/v1/',
+    url: 'https://rbsbuysvzqhfmthdzqsv.supabase.co',
     publishableKey: 'sb_publishable_kTjMJhuXOygsScLtkBw07Q_1_O6gONU'
 };
